@@ -13,7 +13,8 @@ RUN yum -y update \
 && yum -y install vim \
 && yum -y install wget \
 && yum -y install ruby \
-&& yum -y install rubygems
+&& yum -y install rubygems \
+&& yum -y install git
 # 下载ruby Redis管理工具 安装并删除安装包 版本最好对应
 RUN wget https://rubygems.global.ssl.fastly.net/gems/redis-3.2.1.gem \
 &&  gem install -l ./redis-3.2.1.gem \
