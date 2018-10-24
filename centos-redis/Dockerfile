@@ -26,3 +26,4 @@ ADD ./config/redis-sentinel3.conf /config
 VOLUME /config
 # 暴露6379端口
 EXPOSE 6379
+
