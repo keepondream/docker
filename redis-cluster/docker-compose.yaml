@@ -1,0 +1,166 @@
+# 版本
+version: "3.6"
+# 相关服务
+services:
+  # 主节点1
+  redis-master1:
+    # 镜像 基于当前目录的Dockerfile构建
+    image: keepondream/redis-cluster
+    # 定义容器名称
+    container_name: redis-master1
+    # 定义工作目录
+    working_dir: /config
+    # 定义常量 此处定义的常量会带到容器中
+    environment:
+      - PORT=6391
+    # 暴露/映射容器端口 6391 作为节点使用 cluster通信端口为节点端口+10000
+    ports:
+      - "6391:6391"
+      - "16391:16391"
+    # 开启输入输出
+    stdin_open: true
+    # 开启伪终端 即命令行
+    tty: true
+    # 允许容器运行特权命令
+    privileged: true
+    # 挂载(共享) 宿主机目录:容器目录 即 宿主机中的文件改动,容器也同时改动
+    volumes:
+      - ["/usr/docker/redis-cluster/config:/config"]
+    # 指定网段IP
+    networks:
+      - redis-master:
+        - ipv4_address: 172.50.0.2
+    # 容器启动后执行的命令
+    entrypoint:
+      - /bin/bash
+      - redis.sh
+  # 主节点2
+  redis-master2:
+    image: keepondream/redis-cluster
+    container_name: redis-master2
+    working_dir: /config
+    environment:
+      - PORT=6392
+    ports:
+      - "6392:6392"
+      - "16392:16392"
+    stdin_open: true
+    tty: true
+    privileged: true
+    volumes:
+      - ["/usr/docker/redis-cluster/config:/config"]
+    networks:
+      - redis-master:
+          - ipv4_address: 172.50.0.3
+    entrypoint:
+      - /bin/bash
+      - redis.sh
+  # 主节点3
+  redis-master3:
+    image: keepondream/redis-cluster
+    container_name: redis-master3
+    working_dir: /config
+    environment:
+      - PORT=6393
+    ports:
+      - "6393:6393"
+      - "16393:16393"
+    stdin_open: true
+    tty: true
+    privileged: true
+    volumes:
+      - ["/usr/docker/redis-cluster/config:/config"]
+    networks:
+      redis-master:
+        - ipv4_address: 172.50.0.4
+    entrypoint:
+      - /bin/bash
+      - redis.sh
+  # 从节点1
+  redis-slave1:
+    image: keepondream/redis-cluster
+    container_name: redis-slave1
+    working_dir: /config
+    environment:
+      - PORT=6394
+    ports:
+      - "6394:6394"
+      - "16394:16394"
+    stdin_open: true
+    tty: true
+    privileged: true
+    volumes:
+      - ["/usr/docker/redis-cluster/config:/config"]
+    networks:
+      - redis-slave:
+          - ipv4_address: 172.30.0.2
+    entrypoint:
+      - /bin/bash
+      - redis.sh
+  # 从节点2
+  redis-slave2:
+    image: keepondream/redis-cluster
+    container_name: redis-slave2
+    working_dir: /config
+    environment:
+      - PORT=6395
+    ports:
+      - "6395:6395"
+      - "16395:16395"
+    stdin_open: true
+    tty: true
+    privileged: true
+    volumes:
+      - ["/usr/docker/redis-cluster/config:/config"]
+    networks:
+      - redis-slave:
+          - ipv4_address: 172.30.0.3
+    entrypoint:
+      - /bin/bash
+      - redis.sh
+  # 从节点3
+  redis-slave3:
+    image: keepondream/redis-cluster
+    container_name: redis-slave3
+    working_dir: /config
+    environment:
+      - PORT=6396
+    ports:
+      - "6396:6396"
+      - "16396:16396"
+    stdin_open: true
+    tty: true
+    privileged: true
+    volumes:
+      - ["/usr/docker/redis-cluster/config:/config"]
+    networks:
+      - redis-slave:
+          - ipv4_address: 172.30.0.4
+    entrypoint:
+      - /bin/bash
+      - redis.sh
+# 定义容器连接的网络
+networks:
+  # 定义主节点网段
+  redis-master:
+    # 使用桥接驱动
+    driver: bridge
+    ipam:
+      driver: default
+      # 配置创建的网段
+      config:
+        -
+          subnet: 172.50.0.0/16
+  # 定义从节点网段
+  redis-slave:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 172.30.0.0/16
+  # 引入宿主机创建好的网段
+  redis-test:
+    external:
+      # name 后为 宿主机中存在的网络名称
+      name: bridge
