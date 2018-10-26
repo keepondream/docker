@@ -1,5 +1,5 @@
 # 版本
-version: "3.6"
+version: "3"
 # 相关服务
 services:
   # 主节点1
@@ -24,12 +24,11 @@ services:
     # 允许容器运行特权命令
     privileged: true
     # 挂载(共享) 宿主机目录:容器目录 即 宿主机中的文件改动,容器也同时改动
-    volumes:
-      - ["/usr/docker/redis-cluster/config:/config"]
+    volumes: "/usr/docker/redis-cluster/config:/config"
     # 指定网段IP
     networks:
-      - redis-master:
-        - ipv4_address: 172.50.0.2
+      redis-master:
+        ipv4_address: 172.50.0.2
     # 容器启动后执行的命令
     entrypoint:
       - /bin/bash
@@ -47,11 +46,10 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes:
-      - ["/usr/docker/redis-cluster/config:/config"]
+    volumes: "/usr/docker/redis-cluster/config:/config"
     networks:
-      - redis-master:
-          - ipv4_address: 172.50.0.3
+      redis-master:
+        ipv4_address: 172.50.0.3
     entrypoint:
       - /bin/bash
       - redis.sh
@@ -68,11 +66,10 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes:
-      - ["/usr/docker/redis-cluster/config:/config"]
+    volumes: "/usr/docker/redis-cluster/config:/config"
     networks:
       redis-master:
-        - ipv4_address: 172.50.0.4
+        ipv4_address: 172.50.0.4
     entrypoint:
       - /bin/bash
       - redis.sh
@@ -89,11 +86,10 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes:
-      - ["/usr/docker/redis-cluster/config:/config"]
+    volumes: "/usr/docker/redis-cluster/config:/config"
     networks:
-      - redis-slave:
-          - ipv4_address: 172.30.0.2
+      redis-slave:
+        ipv4_address: 172.30.0.2
     entrypoint:
       - /bin/bash
       - redis.sh
@@ -110,11 +106,10 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes:
-      - ["/usr/docker/redis-cluster/config:/config"]
+    volumes: "/usr/docker/redis-cluster/config:/config"
     networks:
-      - redis-slave:
-          - ipv4_address: 172.30.0.3
+      redis-slave:
+        ipv4_address: 172.30.0.3
     entrypoint:
       - /bin/bash
       - redis.sh
@@ -131,11 +126,10 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes:
-      - ["/usr/docker/redis-cluster/config:/config"]
+    volumes: "/usr/docker/redis-cluster/config:/config"
     networks:
-      - redis-slave:
-          - ipv4_address: 172.30.0.4
+      redis-slave:
+        ipv4_address: 172.30.0.4
     entrypoint:
       - /bin/bash
       - redis.sh
