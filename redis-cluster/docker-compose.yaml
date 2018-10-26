@@ -24,7 +24,7 @@ services:
     # 允许容器运行特权命令
     privileged: true
     # 挂载(共享) 宿主机目录:容器目录 即 宿主机中的文件改动,容器也同时改动
-    volumes: "/usr/docker/redis-cluster/config:/config"
+    volumes: ["/usr/docker/redis-cluster/config:/config"]
     # 指定网段IP
     networks:
       redis-master:
@@ -46,7 +46,7 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes: "/usr/docker/redis-cluster/config:/config"
+    volumes: ["/usr/docker/redis-cluster/config:/config"]
     networks:
       redis-master:
         ipv4_address: 172.50.0.3
@@ -66,7 +66,7 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes: "/usr/docker/redis-cluster/config:/config"
+    volumes: ["/usr/docker/redis-cluster/config:/config"]
     networks:
       redis-master:
         ipv4_address: 172.50.0.4
@@ -86,7 +86,7 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes: "/usr/docker/redis-cluster/config:/config"
+    volumes: ["/usr/docker/redis-cluster/config:/config"]
     networks:
       redis-slave:
         ipv4_address: 172.30.0.2
@@ -106,7 +106,7 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes: "/usr/docker/redis-cluster/config:/config"
+    volumes: ["/usr/docker/redis-cluster/config:/config"]
     networks:
       redis-slave:
         ipv4_address: 172.30.0.3
@@ -126,7 +126,7 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    volumes: "/usr/docker/redis-cluster/config:/config"
+    volumes: ["/usr/docker/redis-cluster/config:/config"]
     networks:
       redis-slave:
         ipv4_address: 172.30.0.4

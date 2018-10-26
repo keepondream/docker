@@ -40,7 +40,7 @@ Redis Cluster: 主要是针对海量数据 + 高并发 + 高可用的场景.
 3.推荐方案.虚拟槽分区:用哈希空间,使用分散度良好的哈希函数把所有数据映射到一定范围的整数集合中,定义为槽(slot).槽的范围是0~16383.根据节点的数量进行均匀分配槽中的数据.
 ```
 
-#### 搭建集群(手动操作和利用Ruby管理工具自动化操作)
+#### 搭建集群(手动)
 **集群最少需要6个节点才能保证完整的高可用**
 - 准备节点
 ``` 
@@ -72,5 +72,82 @@ cluster-node-timeout 15000
 
 - 节点握手
 ``` 
+在此之前 需要使用 docker-compose up -d 将所有容器服务启动
+# 在redis客户端发起命令进行通信
 cluster meet {ip} {port}
+参数:
+ip  你需要通信的IP地址"注意这里必须要使用公网IP,否则就算连接上了,过段时间也会丢失,这是个大坑"
+prot 端口
+疑问:
+怎么使用此命令进行通信呢,可能第一次看有点懵.
+具体使用方法:
+1.直接使用 redis-cli -h <公网IP> -p <任意一个节点端口,如:6391> 进入客户端
+CLUSTER meet <公网IP> 6391
+CLUSTER meet <公网IP> 6392
+CLUSTER meet <公网IP> 6393
+CLUSTER meet <公网IP> 6394
+CLUSTER meet <公网IP> 6395
+CLUSTER meet <公网IP> 6396
+2.输入 CLUSTER nodes  查看所有通信中的节点 如下示例:
+1f1dc752152f586eaedd4ab076c53afa2d216b68 172.50.0.1:6393 master - 0 1540521033264 2 connected
+ca2a83085d814059e097c5f24c3bced1e7bc1cb9 172.50.0.1:6395 master - 0 1540521031249 0 connected
+138ab9119030ea73f53e7ff85e472a47bada9540 172.50.0.1:6392 master - 0 1540521030244 1 connected
+3ccfcd443135d8835fdafdfda41d6b72a7481c25 127.0.0.1:6391 myself,master - 0 0 4 connected
+300218b09e6a1017a9200f3372303b0716264ef4 172.50.0.1:6394 master - 0 1540521032262 3 connected
+a2fb0edb121332121c63f735926274ee4bbbedce 172.50.0.1:6396 master - 0 1540521034271 5 connected
+这样就通信了.最前面一串是 节点固定ID,就是唯一标识
+```
+
+- 设置从节点
+``` 
+因为是集群,难免出现意想不到的事情发生,所有 需要接上面六个节点变成 一主一从 组成三对 这样一个主节点挂了,会自动故障转移将从节点变为主节点,再去尝试拉起故障主节点变从节点
+# 分别在从节点客户端运行 命令 指定 主节点的
+--------------------------------------
+redis-cli -h 127.0.0.1 -p 6394
+CLUSTER REPLICATE 3ccfcd443135d8835fdafdfda41d6b72a7481c25
+exit
+--------------------------------------
+redis-cli -h 45.77.5.50 -p 6395
+CLUSTER REPLICATE 138ab9119030ea73f53e7ff85e472a47bada9540
+exit
+--------------------------------------
+redis-cli -h 45.77.5.50 -p 6396
+CLUSTER REPLICATE 1f1dc752152f586eaedd4ab076c53afa2d216b68
+exit
+--------------------------------------
+# 查看所有几点信息 CLUSTER NODES 信息如下(三主三从,分别对应谁的唯一标识):
+3ccfcd443135d8835fdafdfda41d6b72a7481c25 172.30.0.1:6391 master - 0 1540521965842 4 connected
+1f1dc752152f586eaedd4ab076c53afa2d216b68 172.30.0.1:6393 master - 0 1540521963834 2 connected
+138ab9119030ea73f53e7ff85e472a47bada9540 172.30.0.1:6392 master - 0 1540521967862 1 connected
+300218b09e6a1017a9200f3372303b0716264ef4 172.30.0.1:6394 slave 3ccfcd443135d8835fdafdfda41d6b72a7481c25 0 1540521968864 4 connected
+a2fb0edb121332121c63f735926274ee4bbbedce 172.30.0.4:6396 myself,slave 1f1dc752152f586eaedd4ab076c53afa2d216b68 0 0 5 connected
+ca2a83085d814059e097c5f24c3bced1e7bc1cb9 172.30.0.1:6395 slave 138ab9119030ea73f53e7ff85e472a47bada9540 0 1540521966857 1 connected
+```
+- 分配槽
+``` 
+redis集群将所有数据都映射在16384个槽中,每个key会对应一个固定槽,只有节点分配了槽后才能与映射的16384个槽关联
+# 为主节点分配槽,目前3个主节点,平均分配 为  16384 / 3 = 5461 
+redis-cli -h <ip> -p <port(主节点端口)> cluster addslots {start..end}
+redis-cli -h 127.0.0.1 -p 6391 cluster addslots {0..5461}
+redis-cli -h 127.0.0.1 -p 6392 cluster addslots {5462..10922}
+redis-cli -h 127.0.0.1 -p 6393 cluster addslots {10923..16383}
+# 分配后的示例为:
+1f1dc752152f586eaedd4ab076c53afa2d216b68 172.50.0.1:6393 master - 0 1540524083903 2 connected 10923-16383
+ca2a83085d814059e097c5f24c3bced1e7bc1cb9 172.50.0.1:6395 slave 138ab9119030ea73f53e7ff85e472a47bada9540 0 1540524086927 1 connected
+138ab9119030ea73f53e7ff85e472a47bada9540 172.50.0.1:6392 master - 0 1540524081894 1 connected 5462-10922
+3ccfcd443135d8835fdafdfda41d6b72a7481c25 127.0.0.1:6391 myself,master - 0 0 4 connected 0-5461
+300218b09e6a1017a9200f3372303b0716264ef4 172.50.0.1:6394 slave 3ccfcd443135d8835fdafdfda41d6b72a7481c25 0 1540524085918 4 connected
+a2fb0edb121332121c63f735926274ee4bbbedce 172.50.0.1:6396 slave 1f1dc752152f586eaedd4ab076c53afa2d216b68 0 1540524084915 5 connected
+```
+- 操作集群
+``` 
+-c 集群模式 指定集群模式 否则 报错 (error moved .....)
+redis-cli -c -h <公网IP> -p <端口> get name
+redis-cli -c -h <公网IP> -p <端口> set name val
+就可以操作了
+# 示例:
+redis-cli -c -h 127.0.0.1 -p 6391 set aaa haha
+OK
+redis-cli -c -h 127.0.0.1 -p 6394 get aaa
+"haha"
 ```
