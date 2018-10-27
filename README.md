@@ -147,11 +147,11 @@ cd /docker/redis-cluster
 docker-compose up -d
 4.进入任意一个容器节点
 docker exec -it redis-slave1 bash
-4.利用ruby 的 redis-trib.rb 集群管理工具 一键管理进行握手和分配槽
-redis-trib.rb create --replicas 1 45.77.5.50:6391 45.77.5.50:6392 45.77.5.50:6393 45.77.5.50:6394 45.77.5.50:6395 45.77.5.50:6396
-5.利用Redis客户端 进入任意一个节点
+5.利用ruby 的 redis-trib.rb 集群管理工具 一键管理进行握手和分配槽
+redis-trib.rb create --replicas 1 <你的公网IP>:6391 <你的公网IP>:6392 <你的公网IP>:6393 <你的公网IP>:6394 <你的公网IP>:6395 <你的公网IP>:6396
+6.利用Redis客户端 进入任意一个节点
 redis-cli -h <公网IP> -p <端口>
-6.查看cluster所有几点信息
+7.查看cluster所有几点信息
 cluster nodes
 -----------------------------
 # 成功后的信息示例:
