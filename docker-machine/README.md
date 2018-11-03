@@ -94,5 +94,3 @@ help 输出帮助信息
 docker-machine COMMAND --help
 来查看
 ```
-
-docker-machine create -d aliyunecs --aliyunecs-io-optimized=optimized --aliyunecs-description=aliyunecs-machine-driver --aliyunecs-instance-type=ecs.n4.small --aliyunecs-access-key-id=LTAIy4enF8GNvCEj --aliyunecs-access-key-secret=xsi0FR60w8W0zlouWoqL8CD79ycaQd --aliyunecs-region=cn-hangzhou --aliyunecs-ssh-password=W8888888w --aliyunecs-image-id=centos_7_04_64_20G_alibase_201701015.vhd manager1
