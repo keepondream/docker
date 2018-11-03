@@ -67,7 +67,6 @@ docker-machine create -d aliyunecs --aliyunecs-io-optimized=optimized --aliyunec
 4.docker-machine 常用命令
 ``` 
 都在help里面有，下面都是docker-machine后加的命令就是docker-machine command
-
 active 查看活跃的 Docker 主机
 config 输出连接的配置信息
 create 创建一个 Docker 主机
@@ -93,4 +92,24 @@ help 输出帮助信息
 每个参数又都是有help的，可以通过
 docker-machine COMMAND --help
 来查看
+```
+
+5.利用docker swarm 将所有虚拟主机都连接上集群后 进行挂载目录
+``` 
+# 注意 一个目录只能被挂载一次
+# sshfs 这个工具可以把远程主机的文件系统映射到本地主机上，透过 SSH 把远程文件系统挂载到本机上，这样我们可以不必使用 scp 工具就可以做到直接复制及删除远程主机的文件了，就像操作本地磁盘一样方便
+#### 宿主机必须安装 sshfs 后才能进行挂载
+yum  install fuse-sshfs
+# 在宿主机创建 manager1 的挂载目录 路径可以自定义
+mkdir /root/manager1
+# 在虚拟主机 manager 创建目录
+docker-machine ssh manager1 mkdir /root/manager1
+# 进行挂载 docker-machine mount <虚拟主机的名称:虚拟主机文件路劲目录> <当前宿主机目录路径> 这样宿主机的数据和文件都是实时同步的
+docker-machine mount manager1:/root/manager1 /root/manager1
+注意 如果挂载文件不为空,则会提示设置参数进行清空挂载,但是docker-machine mount 不支持有文件挂载
+# 使用一下命令 进行清空挂载,这个慎用,会清除所有文件和数据
+sshfs root@121.196.194.187:/root/worker  worker   -o nonempty
+# 取消挂载
+docker-machine mount -u manager1:/root/manager1 /root/manager1
+# 虚拟主机重启后 需要重新挂载,且宿主机的挂载目录不能有文件,清空后可以挂载成功,之后虚拟主机的文件会同步过来.
 ```

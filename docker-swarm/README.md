@@ -70,5 +70,23 @@ To add a worker to this swarm, run the following command:
     docker swarm join --token SWMTKN-1-3vfapniawgffxly6s68ix2yq1toghwlwvmcvjnt4kb0yr5t4p2-53892gcuc2h6lpqfbp97xxser 172.31.25.141:2377
 -------------------
 #### 然后在对应的虚拟主机上运行要加入的命令token
-#### 一定要注意 必须开放相关端口 否则连接失败
+#### 一定要注意 必须开放相关端口 否则连接失败 另外注意 如果你的宿主机里面有安装防火墙 端口也要开发,被这个折磨了一段时间
+```
+节点升降级
+``` 
+使用 docker node ls 查看集群所有节点 使用升降功能 如果是leader节点会自动选举
+将节点升级为manager:  docker node  promote <节点名ID> 
+将节点降级为worker：  docker node  demote <节点名ID>
+```
+部署服务
+``` 
+# 在manager节点部署nginx服务，服务数量为10个，公开指定端口是8080映射容器80,使用nginx镜像
+docker service create --replicas 5  -p 8080:80 --name nginx  nginx
+# --replicas 服务数量
+容器当中的软件安装:
+apt-get update（更新源信息）
+apt-get install vim
+apt-get install net-tools 
+apt-get install iputils-ping
+apt-get install psmisc
 ```
