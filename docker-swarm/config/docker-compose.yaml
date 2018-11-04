@@ -1,0 +1,35 @@
+# 版本
+version: "3"
+# 相关服务
+services:
+  # Redis节点
+  redis-nodes:
+    # 镜像 基于当前目录的Dockerfile构建
+    image: keepondream/docker-machine-swarm-cluster-redis:latest
+    # 定义工作目录
+    working_dir: /config
+    # 定义常量 此处定义的常量会带到容器中
+    environment:
+      - PORT=6397
+    # 暴露/映射容器端口 6397 作为节点使用 cluster通信端口为节点端口+10000
+    ports:
+      - "6397:6397"
+      - "16397:16397"
+    # 开启输入输出
+    stdin_open: true
+    # 开启伪终端 即命令行
+    tty: true
+    # 允许容器运行特权命令
+    privileged: true
+    # 挂载(共享) 宿主机目录:容器目录 即 宿主机中的文件改动,容器也同时改动
+    volumes: ["/config:/config"]
+    # 指定网络 这里使用自定义 swarmnet
+    networks:
+      - swarmnet
+    # 启动6台服务
+    deploy:
+      replicas: 6
+    # 容器启动后执行的命令
+    command: redis-server /config/redis.conf
+networks:
+  swarmnet:

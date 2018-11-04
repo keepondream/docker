@@ -80,8 +80,8 @@ To add a worker to this swarm, run the following command:
 ```
 部署服务
 ``` 
-# 在manager节点部署nginx服务，服务数量为10个，公开指定端口是8080映射容器80,使用nginx镜像
-docker service create --replicas 5  -p 8080:80 --name nginx  nginx
+# 创建服务 在manager节点部署nginx服务，服务数量为10个，公开指定端口是8080映射容器80,使用nginx镜像
+docker service create --replicas 10  -p 8080:80 --name nginx  nginx
 # --replicas 服务数量
 容器当中的软件安装:
 apt-get update（更新源信息）
@@ -89,4 +89,54 @@ apt-get install vim
 apt-get install net-tools 
 apt-get install iputils-ping
 apt-get install psmisc
+
+# 更新服务 <nginx服务名称别名可自定义>
+docker service update --image nginx:apline nginx
+
+# 删除服务 
+docker service rm nginx
+
+# 减少服务实例
+docker service scale nginx=0
+
+# 增加服务实例
+我们可以使用 docker service scale 对一个服务运行的容器数量进行伸缩。
+当业务处于高峰期时，我们需要扩展服务运行的容器数量，加机器进入到集群当中
+docker service scale nginx=5
+
+# 查看所有服务
+docker service ls
+
+# 查看服务的容器状态
+docker service ps nginx
+
+# 查看服务的详细信息
+docker service inspect nginx
+```
+docker-compose 方式部署服务
+``` 
+使用 docker service create 一次只能部署一个服务，如果想要部署多个服务，就需要docker Stack结合 docker-compose.yml 我们可以一次启动多个关联的服务,当然swarm会把这些服务分散到各个工作节点
+
+利用docker-compose配置redis集群，实现redis集群部署以及集群伸缩
+
+需要解决的问题：
+1、文件共享的问题
+Machine主机跟docker虚拟主机之间通讯
+挂载目录，只能被挂载一次，不能两台远程主机共享一个挂载目录
+
+
+2、网络共享问题
+
+
+3、配置文件问题
+ 需要一个配置文件的模板，不同的容器当中都能够去拥有这个模板
+ 
+docker config  create  redis.conf  redis.conf
+ 配置文件名称 文件地址
+ 
+优点：
+提供一个所有服务的模板，免去一些公共配置，需要临时修改的时候，修改的复杂度
+
+ docker stack deploy -c docker-compose.yaml  redis-cluster
+
 ```
