@@ -28,7 +28,7 @@ services:
       - swarmnet
     # 启动6台服务
     deploy:
-      replicas: 6
+      replicas: 8
     # 容器启动后执行的命令
     command: redis-server /config/redis.conf
 networks:
