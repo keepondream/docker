@@ -1,9 +1,12 @@
 #### docker笔记
 目录
 ``` 
-centos-redis目录  基于centos 构建Redis镜像
+centos-redis        基于centos 构建Redis镜像
+docker-machine      跨平台构建docker环境工具
+docker-swarm        集群化管理一个个的docker宿主机或虚拟机
 redis-cluster    redis Cluster集群搭建 应对场景海量行数据
 redis-sentinel   哨兵集群 + Redis主从  应对场景单机解决高并发,数据量不是很大
+
 ```
 
 #### Redis Cluster 相关命令
